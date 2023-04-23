@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_explorer/ui/screens/movie_page.dart';
 
 import '../../models/movie.dart';
 
@@ -22,7 +24,7 @@ class MovieCard extends StatelessWidget {
       ),
       color: Colors.white,
       child: InkWell(
-        onTap: () {},
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => MoviePage(movie.id))),
         customBorder: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -37,22 +39,39 @@ class MovieCard extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(22),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       movie.title,
-                      style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(
-                      height: 16,
+                      height: 8,
                     ),
                     Text(
                       'Bryan Singer',
-                      style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey),
-                    )
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    RatingBarIndicator(
+                      rating: movie.vote / 2,
+                      itemBuilder: (context, index) => const Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                      ),
+                      itemCount: 5,
+                      itemSize: 20,
+                      direction: Axis.horizontal,
+                    ),
                   ],
                 ),
               ),
