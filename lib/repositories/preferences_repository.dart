@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/token.dart';
 
 class PreferencesRepository {
   Future<void> saveFavorites(List<int> movies) async {
@@ -16,5 +20,25 @@ class PreferencesRepository {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList('movies') ?? [];
     return list.map((e) => int.parse(e)).toList();
+  }
+
+  Future<void> saveToken(Token token) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('token', jsonEncode(token.toJson()));
+  }
+
+  Future<void> removeToken() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('token');
+  }
+
+  Future<Token?> loadToken() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final json = prefs.getString('token');
+    if (json == null) {
+      return null;
+    } else {
+      return Token.fromJson(jsonDecode(json));
+    }
   }
 }
