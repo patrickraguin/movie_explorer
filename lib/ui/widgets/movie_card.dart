@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_explorer/blocs/favorite_cubit.dart';
+import 'package:movie_explorer/blocs/user_cubit.dart';
 import 'package:movie_explorer/ui/screens/movie_page.dart';
 
 import '../../models/movie.dart';
@@ -83,15 +84,6 @@ class MovieCard extends StatelessWidget {
                     const SizedBox(
                       height: 8,
                     ),
-                    Text(
-                      'Bryan Singer',
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey),
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
                     RatingBarIndicator(
                       rating: movie.vote / 2,
                       itemBuilder: (context, index) => const Icon(
@@ -102,6 +94,7 @@ class MovieCard extends StatelessWidget {
                       itemSize: 20,
                       direction: Axis.horizontal,
                     ),
+                    TextButton(onPressed: () => context.read<UserCubit>().rate(movie.id), child: const Text('Voter'))
                   ],
                 ),
               ),

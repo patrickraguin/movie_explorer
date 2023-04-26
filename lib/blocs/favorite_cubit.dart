@@ -7,18 +7,17 @@ class FavoriteCubit extends Cubit<List<int>> {
   final PreferencesRepository preferencesRepository;
 
   void addFavorite(int movieId) {
-    // Ajout de l'id dans le state
-
-    // Sauvegarde du state des les SharedPreferences
+    emit([...state, movieId]);
+    preferencesRepository.saveFavorites(state);
   }
 
   void removeFavorite(int movieId) {
-    // Suppression de l'id dans le state
-
-    // Sauvegarde du state des les SharedPreferences
+    state.removeWhere((element) => element == movieId);
+    emit([...state]);
+    preferencesRepository.saveFavorites(state);
   }
 
   Future<void> loadFavorites() async {
-    // Chargement des données depuis les SharedPreferences
+    emit(await preferencesRepository.loadFavorites());
   }
 }

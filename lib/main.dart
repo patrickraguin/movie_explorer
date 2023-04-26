@@ -9,11 +9,17 @@ import 'package:movie_explorer/repositories/user_repository.dart';
 import 'package:movie_explorer/ui/screens/home_page.dart';
 import 'package:movie_explorer/ui/screens/login_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final PreferencesRepository preferencesRepository = PreferencesRepository();
+  final UserRepository userRepository = UserRepository(preferencesRepository);
+  final UserCubit userCubit = UserCubit(userRepository);
+  await userCubit.init();
+
   runApp(MultiBlocProvider(providers: [
-    BlocProvider(create: (_) => UserCubit(UserRepository(PreferencesRepository()))),
+    BlocProvider(create: (_) => userCubit),
     BlocProvider(create: (_) => MoviesCubit(TmdbRepository())),
-    BlocProvider(create: (_) => FavoriteCubit(PreferencesRepository()))
+    BlocProvider(create: (_) => FavoriteCubit(preferencesRepository))
   ], child: const MyApp()));
 }
 

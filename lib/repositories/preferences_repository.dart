@@ -17,7 +17,7 @@ class PreferencesRepository {
     if (json == null) {
       return [];
     } else {
-      return jsonDecode(json);
+      return jsonDecode(json).cast<int>();
     }
   }
 

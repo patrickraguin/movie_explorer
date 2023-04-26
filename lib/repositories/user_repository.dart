@@ -10,52 +10,66 @@ class UserRepository {
   final PreferencesRepository preferencesRepository;
   Token? token;
 
-  Future<void> login(String username, String password) async {
-    final response = await dio.post('/users/login', data: {
-      'username': username,
-      'password': password,
-    });
+  Future<bool> init() async {
+    token = await preferencesRepository.loadToken();
+    return token != null;
+  }
 
-    if (response.statusCode == 200) {
-      final data = response.data as Map<String, dynamic>;
-      token = Token.fromJson(data);
-      preferencesRepository.saveToken(token!);
-    } else {
+  Future<void> login(String username, String password) async {
+    try {
+      final response = await dio.post('/users/login', data: {
+        'username': username,
+        'password': password,
+      });
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        token = Token.fromJson(data);
+        preferencesRepository.saveToken(token!);
+      } else {
+        throw Exception();
+      }
+    } on DioError catch (_) {
       throw Exception();
     }
   }
 
   Future<void> rating(int movieId, double value) async {
-    final response = await dio.post('/rating', data: {
-      'movieId': movieId,
-      'value': value,
-    });
-
-    if (response.statusCode == 403) {
-      if (token == null) {
+    try {
+      dio.options.headers['Authorization'] = 'Bearer ${token?.accessToken}';
+      final response = await dio.post('/rating', data: {
+        'movieId': movieId,
+        'rating': 5,
+      });
+    } on DioError catch (e) {
+      if (e.response?.statusCode == 403) {
+        if (token == null) {
+          throw Exception();
+        }
+        await _refreshToken();
+        await rating(movieId, value);
+      } else {
         throw Exception();
       }
-      await _refreshToken();
-      await rating(movieId, value);
-    } else {
-      throw Exception();
     }
   }
 
   Future<void> _refreshToken() async {
-    final response = await dio.post('/users/refreshToken', data: {
-      'refresh_token': token!.refreshToken,
-    });
-
-    if (response.statusCode == 200) {
+    try {
+      final response = await dio.post('/users/refreshToken', data: {
+        'refresh_token': token!.refreshToken,
+      });
       final data = response.data as Map<String, dynamic>;
       token = Token.fromJson(data);
+      print(token!.accessToken);
       preferencesRepository.saveToken(token!);
-    } else if (response.statusCode == 403) {
-      token = null;
-      preferencesRepository.removeToken();
-    } else {
-      throw Exception();
+    } on DioError catch (e) {
+      if (e.response?.statusCode == 403) {
+        token = null;
+        preferencesRepository.removeToken();
+      } else {
+        throw Exception();
+      }
     }
   }
 }
