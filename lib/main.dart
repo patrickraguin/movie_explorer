@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_explorer/blocs/favorite_cubit.dart';
 import 'package:movie_explorer/blocs/movies_cubit.dart';
+import 'package:movie_explorer/blocs/profile_cubit.dart';
 import 'package:movie_explorer/blocs/user_cubit.dart';
 import 'package:movie_explorer/repositories/preferences_repository.dart';
 import 'package:movie_explorer/repositories/tmdb_repository.dart';
@@ -18,6 +19,7 @@ Future<void> main() async {
 
   runApp(MultiBlocProvider(providers: [
     BlocProvider(create: (_) => userCubit),
+    BlocProvider(create: (_) => ProfileCubit(userRepository)),
     BlocProvider(create: (_) => MoviesCubit(TmdbRepository())),
     BlocProvider(create: (_) => FavoriteCubit(preferencesRepository))
   ], child: const MyApp()));
@@ -31,6 +33,7 @@ class MyApp extends StatelessWidget {
     context.read<FavoriteCubit>().loadFavorites();
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_explorer/blocs/movies_cubit.dart';
 import 'package:movie_explorer/blocs/movies_state.dart';
 import 'package:movie_explorer/models/movie.dart';
+import 'package:movie_explorer/ui/screens/profile_page.dart';
 import 'package:movie_explorer/ui/widgets/movie_card.dart';
 
 import '../../models/data_state.dart';
@@ -16,6 +17,32 @@ class HomePage extends StatelessWidget {
     context.read<MoviesCubit>().loadMovies();
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8F8),
+      appBar: AppBar(),
+      drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Center(
+                  child: Text(
+                'MovieExplorer',
+                style: TextStyle(color: Colors.white),
+              )),
+            ),
+            ListTile(
+              title: const Text('Profile'),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfilePage())),
+            ),
+          ],
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: RefreshIndicator(
