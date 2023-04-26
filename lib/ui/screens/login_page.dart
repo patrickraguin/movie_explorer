@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_explorer/blocs/user_cubit.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -52,6 +54,7 @@ class LoginPage extends StatelessWidget {
                     // Permet de récupérer la valeur du champ via le controleur
                     final String username = usernameController.text;
                     final String password = passwordController.text;
+                    context.read<UserCubit>().login(username, password);
                   }
                 },
                 child: const Text('Se connecter'))
