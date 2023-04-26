@@ -23,7 +23,9 @@ class HomePage extends StatelessWidget {
             child: BlocBuilder<MoviesCubit, MoviesState>(builder: (context, state) {
               switch (state.dataState) {
                 case DataState.loading:
-                  return const Center(child: CircularProgressIndicator());
+                  return SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: const Center(child: CircularProgressIndicator()));
                 case DataState.loaded:
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
