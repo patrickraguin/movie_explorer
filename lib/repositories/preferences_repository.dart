@@ -22,7 +22,8 @@ class PreferencesRepository {
   }
 
   Future<void> saveToken(Token token) async {
-    await storage.write(key: 'token', value: jsonEncode(token.toJson()));
+    final Map<String, dynamic> json = token.toJson();
+    await storage.write(key: 'token', value: jsonEncode(json));
   }
 
   Future<void> removeToken() async {

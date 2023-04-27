@@ -36,6 +36,11 @@ class UserRepository {
     }
   }
 
+  Future<void> logout() async {
+    token = null;
+    preferencesRepository.removeToken();
+  }
+
   Future<void> rating(int movieId, double value) async {
     try {
       dio.options.headers['Authorization'] = 'Bearer ${token?.accessToken}';

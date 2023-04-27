@@ -25,4 +25,9 @@ class UserCubit extends Cubit<bool> {
   Future<void> rate(int movieId) async {
     await userRepository.rating(movieId, 5);
   }
+
+  Future<void> logout() async {
+    await userRepository.logout();
+    emit(false);
+  }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_explorer/blocs/movies_cubit.dart';
 import 'package:movie_explorer/blocs/movies_state.dart';
+import 'package:movie_explorer/blocs/user_cubit.dart';
 import 'package:movie_explorer/models/movie.dart';
 import 'package:movie_explorer/ui/screens/profile_page.dart';
 import 'package:movie_explorer/ui/widgets/movie_card.dart';
@@ -37,8 +38,15 @@ class HomePage extends StatelessWidget {
               )),
             ),
             ListTile(
+              leading: const Icon(Icons.person_rounded),
               title: const Text('Profile'),
               onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfilePage())),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Se déconnecter'),
+              onTap: () => context.read<UserCubit>().logout(),
             ),
           ],
         ),

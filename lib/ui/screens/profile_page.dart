@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_explorer/blocs/profile_cubit.dart';
 import 'package:movie_explorer/blocs/profile_state.dart';
 import 'package:movie_explorer/models/data_state.dart';
+import 'package:movie_explorer/ui/widgets/textfield.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -18,24 +19,13 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController lastnameController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    context.read<ProfileCubit>().loadProfile();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    context.read<ProfileCubit>().loadProfile();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
       ),
-      body: BlocConsumer<ProfileCubit, ProfileState>(
-        listener: (context, state) {
-          if (state.dataState == DataState.loaded) {
-            firstnameController.text = state.profile!.firstname;
-            lastnameController.text = state.profile!.lastname;
-          }
-        },
+      body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
           switch (state.dataState) {
             case DataState.loading:
@@ -46,41 +36,51 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Text('Une erreur est survenue, veuillez recommencer'),
               );
             case DataState.loaded:
-              return Form(
-                key: formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: firstnameController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Le champs doit être renseigné';
-                        } else {
-                          return null;
-                        }
-                      },
-                    ),
-                    TextFormField(
-                      controller: lastnameController, // Lien avec le controleur
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Le champs doit être renseigné';
-                        } else {
-                          return null;
-                        }
-                      },
-                    ),
-                    ElevatedButton(
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            final String firstname = firstnameController.text;
-                            final String lastname = lastnameController.text;
-                            context.read<ProfileCubit>().saveProfile(firstname, lastname);
-                            Navigator.of(context).pop();
+              firstnameController.text = state.profile?.firstname ?? '';
+              lastnameController.text = state.profile?.lastname ?? '';
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: firstnameController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Le champs doit être renseigné';
+                          } else {
+                            return null;
                           }
                         },
-                        child: const Text('Enregistrer'))
-                  ],
+                        decoration: CustomInputDecoration('Prénom'),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      TextFormField(
+                        controller: lastnameController, // Lien avec le controleur
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Le champs doit être renseigné';
+                          } else {
+                            return null;
+                          }
+                        },
+                        decoration: CustomInputDecoration('Nom'),
+                      ),
+                      ElevatedButton(
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              final String firstname = firstnameController.text;
+                              final String lastname = lastnameController.text;
+                              context.read<ProfileCubit>().saveProfile(firstname, lastname);
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          child: const Text('Enregistrer'))
+                    ],
+                  ),
                 ),
               );
           }
