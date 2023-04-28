@@ -41,12 +41,12 @@ class UserRepository {
     preferencesRepository.removeToken();
   }
 
-  Future<void> rating(int movieId, double value) async {
+  Future<void> rate(int movieId, double rating) async {
     try {
       dio.options.headers['Authorization'] = 'Bearer ${token?.accessToken}';
       await dio.post('/rating', data: {
         'movieId': movieId,
-        'rating': 5,
+        'rating': rating,
       });
     } on DioError catch (e) {
       if (e.response?.statusCode == 403) {
@@ -54,7 +54,7 @@ class UserRepository {
           throw Exception();
         }
         await _refreshToken();
-        await rating(movieId, value);
+        await rate(movieId, rating);
       } else {
         throw Exception();
       }

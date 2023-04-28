@@ -17,6 +17,57 @@ class MovieCard extends StatelessWidget {
 
   final Movie movie;
 
+  Future<void> _rate(BuildContext context) async {
+    final TextEditingController controller = TextEditingController();
+    final GlobalKey<FormState> formKey = GlobalKey();
+    final value = await showDialog<double>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(movie.title),
+            content: Form(
+              key: formKey,
+              child: TextFormField(
+                controller: controller,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'La note doit être comprise entre 0 et 10';
+                  }
+                  final rate = double.tryParse(value);
+                  if (rate == null || rate < 0 || rate > 10) {
+                    return 'La note doit être comprise entre 0 et 10';
+                  }
+                  return null;
+                },
+                decoration: const InputDecoration(hintText: "Note entre 0 et 10"),
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Annuler'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              ElevatedButton(
+                child: const Text('Voter'),
+                onPressed: () {
+                  if (formKey.currentState!.validate()) {
+                    final value = double.tryParse(controller.text);
+                    if (value != null) {
+                      Navigator.of(context).pop(value);
+                    }
+                  }
+                },
+              ),
+            ],
+          );
+        });
+    if (value != null && context.mounted) {
+      context.read<UserCubit>().rate(movie.id, value);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -94,7 +145,11 @@ class MovieCard extends StatelessWidget {
                       itemSize: 20,
                       direction: Axis.horizontal,
                     ),
-                    TextButton(onPressed: () => context.read<UserCubit>().rate(movie.id), child: const Text('Voter'))
+                    TextButton(
+                        onPressed: () {
+                          _rate(context);
+                        },
+                        child: const Text('Voter'))
                   ],
                 ),
               ),
