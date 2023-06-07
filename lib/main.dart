@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_explorer/blocs/favorite_cubit.dart';
@@ -12,8 +15,10 @@ import 'package:movie_explorer/ui/screens/login_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   final PreferencesRepository preferencesRepository = PreferencesRepository();
-  final UserRepository userRepository = UserRepository(preferencesRepository);
+  final UserRepository userRepository = UserRepository(FirebaseAuth.instance, FirebaseFirestore.instance);
   final UserCubit userCubit = UserCubit(userRepository);
   await userCubit.init();
 
@@ -31,6 +36,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.read<FavoriteCubit>().loadFavorites();
+
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,

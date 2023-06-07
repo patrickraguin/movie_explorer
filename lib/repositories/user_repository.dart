@@ -1,116 +1,39 @@
-import 'package:dio/dio.dart';
-import 'package:movie_explorer/models/token.dart';
-import 'package:movie_explorer/repositories/preferences_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/profile.dart';
 
 class UserRepository {
-  UserRepository(this.preferencesRepository);
+  UserRepository(this.firebaseAuth, this.firestore);
 
-  final dio = Dio(BaseOptions(baseUrl: 'https://movies-backend-ykdv.onrender.com'));
-
-  final PreferencesRepository preferencesRepository;
-  Token? token;
+  final FirebaseAuth firebaseAuth;
+  final FirebaseFirestore firestore;
 
   Future<bool> init() async {
-    token = await preferencesRepository.loadToken();
-    return token != null;
+    return firebaseAuth.currentUser != null;
   }
 
   Future<void> login(String username, String password) async {
-    try {
-      final response = await dio.post('/users/login', data: {
-        'username': username,
-        'password': password,
-      });
-
-      if (response.statusCode == 200) {
-        final data = response.data as Map<String, dynamic>;
-        token = Token.fromJson(data);
-        preferencesRepository.saveToken(token!);
-      } else {
-        throw Exception();
-      }
-    } on DioError catch (_) {
-      throw Exception();
-    }
+    await firebaseAuth.signInWithEmailAndPassword(email: username, password: password);
   }
 
   Future<void> logout() async {
-    token = null;
-    preferencesRepository.removeToken();
+    await firebaseAuth.signOut();
   }
 
   Future<void> rate(int movieId, double rating) async {
-    try {
-      dio.options.headers['Authorization'] = 'Bearer ${token?.accessToken}';
-      await dio.post('/rating', data: {
-        'movieId': movieId,
-        'rating': rating,
-      });
-    } on DioError catch (e) {
-      if (e.response?.statusCode == 403) {
-        if (token == null) {
-          throw Exception();
-        }
-        await _refreshToken();
-        await rate(movieId, rating);
-      } else {
-        throw Exception();
-      }
-    }
-  }
-
-  Future<void> _refreshToken() async {
-    try {
-      final response = await dio.post('/users/refreshToken', data: {
-        'refresh_token': token!.refreshToken,
-      });
-      final data = response.data as Map<String, dynamic>;
-      token = Token.fromJson(data);
-      preferencesRepository.saveToken(token!);
-    } on DioError catch (e) {
-      if (e.response?.statusCode == 403) {
-        token = null;
-        preferencesRepository.removeToken();
-      } else {
-        throw Exception();
-      }
-    }
+    await firestore.doc('users/${firebaseAuth.currentUser?.uid}/movies/${movieId.toString()}').set({'rating': rating});
   }
 
   Future<void> updateProfile(Profile profile) async {
-    try {
-      dio.options.headers['Authorization'] = 'Bearer ${token?.accessToken}';
-      await dio.post('/profile', data: profile.toJson());
-    } on DioError catch (e) {
-      if (e.response?.statusCode == 403) {
-        if (token == null) {
-          throw Exception();
-        }
-        await _refreshToken();
-        await updateProfile(profile);
-      } else {
-        throw Exception();
-      }
-    }
+    await firestore
+        .doc('users/${firebaseAuth.currentUser?.uid}')
+        .set({'firstname': profile.firstname, 'lastname': profile.lastname});
   }
 
   Future<Profile> fetchProfile() async {
-    try {
-      dio.options.headers['Authorization'] = 'Bearer ${token?.accessToken}';
-      final response = await dio.get('/profile');
-      return Profile.fromJson(response.data);
-    } on DioError catch (e) {
-      if (e.response?.statusCode == 403) {
-        if (token == null) {
-          throw Exception();
-        }
-        await _refreshToken();
-        return await fetchProfile();
-      } else {
-        throw Exception();
-      }
-    }
+    final doc = await firestore.doc('users/${firebaseAuth.currentUser?.uid}').get();
+    final Map<String, dynamic> data = doc.data() ?? {};
+    return Profile(data['firstname'] ?? '', data['lastname'] ?? '');
   }
 }
