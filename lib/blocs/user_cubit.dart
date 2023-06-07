@@ -9,7 +9,12 @@ class UserCubit extends Cubit<bool> {
   final UserRepository userRepository;
 
   Future<void> init() async {
-    emit(await userRepository.init());
+    try {
+      emit(await userRepository.init());
+    } catch(e) {
+      emit(false);
+      log(e.toString());
+    }
   }
 
   Future<void> login(String username, String password) async {
@@ -23,11 +28,19 @@ class UserCubit extends Cubit<bool> {
   }
 
   Future<void> rate(int movieId, double rating) async {
-    await userRepository.rate(movieId, rating);
+    try {
+      await userRepository.rate(movieId, rating);
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   Future<void> logout() async {
-    await userRepository.logout();
-    emit(false);
+    try {
+      await userRepository.logout();
+      emit(false);
+    } catch (e) {
+      log(e.toString());
+    }
   }
 }
